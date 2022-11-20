@@ -1,6 +1,7 @@
 mod domains;
 mod infra;
 mod server;
+mod controller;
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 
@@ -21,13 +22,8 @@ async fn manual_hello() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        App::new()
-            .service(hello)
-            .service(echo)
-            .route("/hey", web::get().to(manual_hello))
-    })
-        .bind(("127.0.0.1", 8080))?
-        .run()
-        .await
+    let server = server::Server {
+        user_repository: infra::repository::user_repository::UserRepositoryImpl::new()
+    };
+    server.run().await
 }
